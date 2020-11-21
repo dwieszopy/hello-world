@@ -1,8 +1,11 @@
-'''This file does nothing'''
+"""This file does nothing"""
+import os
+import boto3
+import requests
 
-print('Hello World!')
-mystring='dupa'
+print("Hello World!")
+mystring = "dupa"
+
 
 mystring.capitalize
-
-print(mystring)
+print(mystring.capitalize())
