@@ -3,7 +3,7 @@ import os
 
 
 print("Hello World!")
-mystring = "dupa"
+mystring = "Another string"
 
 
 mystring.capitalize
