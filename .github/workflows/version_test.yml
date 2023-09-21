@@ -1,20 +1,23 @@
 name: Integration Test
 on: [push]
+
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-      - name: Get Versioning Data
-        id: versioning
-        uses: Soumeh/Auto-Versioning@main
-      - name: Create Release
-        uses: meeDamian/github-release@2.0
+      - name: Checkout Code
+        uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          # names the release after the head commit
-          name: ${{ github.event.head_commit.message }}
-          tag: ${{ steps.versioning.outputs.tag }}
-          body: "${{ steps.versioning.outputs.changelog }}"
-          gzip: false
+          ref: ${{ github.head_ref }}   # checkout the correct branch name
+          fetch-depth: 0                # fetch the whole repo history
+
+      - name: Git Version
+        id: version
+        uses: codacy/git-version@2.7.1
+      
+      - name: Use the version
+        run: |
+          echo ${{ steps.version.outputs.version }}
+      - name: Use the previous version
+        run: |
+          echo ${{ steps.version.outputs.previous-version }}
