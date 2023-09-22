@@ -1,7 +1,9 @@
 name: Build and deploy base docker image for dagster's fast deployments.
 run-name: ${{ github.actor }} is building docker image
-on: push
-
+on: 
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -38,13 +40,22 @@ jobs:
       - name: Pull the image to local docker storage
         run: docker pull localhost:5000/test-image:temporary
 
-      - name: Get version
-        id: version
-        uses: codacy/git-version@2.7.1
-
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Dockerfile contents in this release:
+            $(cat docker/Dockerfile)
+          draft: false
+          prerelease: false
       - name: Print Published Tag
         run: |
           echo "Put the following tag in the 'dagster' repo, branch_deployments.yml SERVERLESS_BASE_IMAGE_TAG"
           echo "to test out your base docker image in staging:"
-          echo "SERVERLESS_BASE_IMAGE_TAG = 'test-image_${{ steps.version.outputs.version }}'"
+          echo "SERVERLESS_BASE_IMAGE_TAG = 'test-image_${{ github.ref }}'"
 
