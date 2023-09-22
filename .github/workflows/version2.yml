@@ -25,17 +25,16 @@ jobs:
           path: project-repo
 
       - name: Print Published Tag
+        id: docker_tag
         run: |
           echo "Put the following tag in the 'dagster' repo, branch_deployments.yml SERVERLESS_BASE_IMAGE_TAG"
           echo "to test out your base docker image in staging:"
-          echo "SERVERLESS_BASE_IMAGE_TAG = 'cybersyn-dagster-base-image_${{ github.run_number }}'"
+          echo "SERVERLESS_BASE_IMAGE_TAG = 'cybersyn-dagster-base-image_${{ github.run_number }}'" >> "$GITHUB_OUTPUT"
           
       - name: Get Dockerfile content
         id: dockerfile_content
         run: |
-          echo "$(pwd)"
-          echo "$(ls -al project-repo)"
-          echo "dockerfile_content = $(cat docker/Dockerfile)" >> "$GITHUB_OUTPUT"
+          echo "dockerfile_content = $(cat project-repo/docker/Dockerfile)" >> "$GITHUB_OUTPUT"
           echo "$(cat project-repo/docker/Dockerfile)"
     
       - name: Create Release
@@ -48,8 +47,10 @@ jobs:
           tag_name: ${{ github.run_number }}
           release_name: Release ${{ github.run_number }}
           body: |
-            Pushed 
-            Changes to the Dockerfile:
+            Pushed image ${{ steps.docker_tag.SERVERLESS_BASE_IMAGE_TAG}} to dagster cloud.
+            Dockerfile contents:
+            ---------------------------------------------
             ${{ steps.dockerfile_content.outputs.dockerfile_content }}
+            ---------------------------------------------
           draft: false
           prerelease: false
