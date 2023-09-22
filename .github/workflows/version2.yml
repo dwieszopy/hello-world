@@ -47,15 +47,8 @@ jobs:
           echo "Put the following tag in the 'dagster' repo, branch_deployments.yml SERVERLESS_BASE_IMAGE_TAG"
           echo "to test out your base docker image in staging:"
           echo "SERVERLESS_BASE_IMAGE_TAG = 'acme-dagster-base-image_${{ github.run_number }}'"
-      - name: Get next version
-        id: get_next_version
-        uses: thenativeweb/get-next-version@main
-        with:
-          prefix: 'v' # optional, defaults to ''
-      - name: Show the next version
-        run: |
-          echo ${{ steps.get_next_version.outputs.version }}
-          echo ${{ steps.get_next_version.outputs.hasNextVersion }}
+      - name: Determine Version
+        uses: gittools/actions/gitversion/execute@v0
       - name: Get Dockerfile content
         id: dockerfile_content
         run: echo "dockerfile_content = $(cat docker/Dockerfile)" >> "$GITHUB_ENV"
