@@ -23,7 +23,10 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           path: project-repo
-
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0
+        with:
+          versionSpec: '5.x'
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
