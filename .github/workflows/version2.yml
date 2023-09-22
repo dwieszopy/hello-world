@@ -44,20 +44,20 @@ jobs:
           echo ${{ steps.dockerfile_content.outputs.dockerfile_content }}
           echo ${{ steps.docker_tag.outputs.SERVERLESS_BASE_IMAGE_TAG }}
 
-      # - name: Create Release
-      #   id: create_release
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-      #   with:
-      #     tag_name: ${{ github.run_number }}
-      #     release_name: Release ${{ github.run_number }}
-      #     body: |
-      #       Pushed image ${{ steps.docker_tag.SERVERLESS_BASE_IMAGE_TAG}} to dagster cloud.
-      #       Dockerfile contents:
-      #       ---------------------------------------------
-      #       ${{ steps.dockerfile_content.outputs.dockerfile_content }}
-      #       ---------------------------------------------
-      #     draft: false
-      #     prerelease: false
+        with:
+          tag_name: ${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
+          body: |
+            Pushed image ${{ steps.docker_tag.SERVERLESS_BASE_IMAGE_TAG}} to dagster cloud.
+            Dockerfile contents:
+            ---------------------------------------------
+            ${{ steps.dockerfile_content.outputs.dockerfile_content }}
+            ---------------------------------------------
+          draft: false
+          prerelease: false
