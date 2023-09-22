@@ -29,7 +29,7 @@ jobs:
         run: |
           echo "Put the following tag in the 'dagster' repo, branch_deployments.yml SERVERLESS_BASE_IMAGE_TAG"
           echo "to test out your base docker image in staging:"
-          echo "SERVERLESS_BASE_IMAGE_TAG = 'cybersyn-dagster-base-image_${{ github.run_number }}'" >> "$GITHUB_OUTPUT"
+          echo "SERVERLESS_BASE_IMAGE_TAG = 'acme-dagster-base-image_${{ github.run_number }}'" >> "$GITHUB_OUTPUT"
           
       - name: Get Dockerfile content
         id: dockerfile_content
@@ -42,8 +42,9 @@ jobs:
         run: |
           echo ${{ github.run_number }}
           echo ${{ steps.dockerfile_content.outputs.dockerfile_content }}
+          echo ${{ steps.dockerfile_content.outputs }}
           echo ${{ steps.docker_tag.outputs.SERVERLESS_BASE_IMAGE_TAG }}
-          echo ${{ steps.docker_tag.outputs.SERVERLESS_BASE_IMAGE_TAG }}
+          echo ${{ steps.docker_tag.outputs }}
       # - name: Create Release
       #   id: create_release
       #   uses: actions/create-release@v1
