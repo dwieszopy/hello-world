@@ -23,38 +23,17 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           path: project-repo
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0
-        with:
-          versionSpec: '5.x'
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver-opts: network=host
-
-      - name: Build and push to local registry
-        uses: docker/build-push-action@v5
-        with:
-          context: "{{defaultContext}}:docker"
-          push: true
-          tags: localhost:5000/acme-dagster-base-image:temporary
-
-      - name: Inspect docker image
-        run: docker buildx imagetools inspect localhost:5000/acme-dagster-base-image:temporary
 
       - name: Print Published Tag
         run: |
           echo "Put the following tag in the 'dagster' repo, branch_deployments.yml SERVERLESS_BASE_IMAGE_TAG"
           echo "to test out your base docker image in staging:"
-          echo "SERVERLESS_BASE_IMAGE_TAG = 'acme-dagster-base-image_${{ github.run_number }}'"
-      - name: Determine Version
-        uses: gittools/actions/gitversion/execute@v0
+          echo "SERVERLESS_BASE_IMAGE_TAG = 'cybersyn-dagster-base-image_${{ github.run_number }}'"
+          
       - name: Get Dockerfile content
         id: dockerfile_content
         run: echo "dockerfile_content = $(cat docker/Dockerfile)" >> "$GITHUB_ENV"
+    
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -62,11 +41,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
     
         with:
-          tag_name: ${{ steps.get_next_version.outputs.version }}
-          release_name: Release ${{ steps.get_next_version.outputs.version }}
+          tag_name: ${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
           body: |
             Changes to the Dockerfile:
             ${{ steps.dockerfile_content.outputs.dockerfile_content }}
           draft: false
           prerelease: false
-
