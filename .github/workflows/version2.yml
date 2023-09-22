@@ -34,9 +34,9 @@ jobs:
         id: dockerfile_content
         run: |
           echo "$(pwd)"
-          echo "$(ls -al)"
+          echo "$(ls -al project-repo)"
           echo "dockerfile_content = $(cat docker/Dockerfile)" >> "$GITHUB_OUTPUT"
-          echo "$(cat docker/Dockerfile)"
+          echo "$(cat project-repo/docker/Dockerfile)"
     
       - name: Create Release
         id: create_release
