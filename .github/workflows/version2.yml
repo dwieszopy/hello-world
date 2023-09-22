@@ -35,6 +35,8 @@ jobs:
         id: dockerfile_content
         run: |
           echo "dockerfile_content = $(cat project-repo/docker/Dockerfile)<<EOF" >> "$GITHUB_OUTPUT"
+          echo $dockerfile_content >> $GITHUB_OUTPUT 
+          echo "EOF" >> $GITHUB_OUTPUT
           echo "$(cat project-repo/docker/Dockerfile)"
     
       - name: Create Release
