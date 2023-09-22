@@ -7,11 +7,10 @@ run-name: ${{ github.actor }} is building docker image
 on:
   push:
     branches:
-      - master
-    paths:
-      - 'docker/**'
+      - main
+
 jobs:
-  build_docker_image:
+  build:
     runs-on: ubuntu-latest
     services:
       registry:
@@ -33,7 +32,7 @@ jobs:
         with:
           driver-opts: network=host
 
-      - name: Build and push to temporary local registry 
+      - name: Build and push to local registry
         uses: docker/build-push-action@v5
         with:
           context: "{{defaultContext}}:docker"
@@ -43,23 +42,23 @@ jobs:
       - name: Inspect docker image
         run: docker buildx imagetools inspect localhost:5000/acme-dagster-base-image:temporary
 
-      - name: Pull the image to local docker storage
-        run: docker pull localhost:5000/acme-dagster-base-image:temporary
-
-      - name: Get version
-        id: version
-        uses: codacy/git-version@2.7.1
-
       - name: Print Published Tag
         run: |
           echo "Put the following tag in the 'dagster' repo, branch_deployments.yml SERVERLESS_BASE_IMAGE_TAG"
           echo "to test out your base docker image in staging:"
-          echo "SERVERLESS_BASE_IMAGE_TAG = 'acme-dagster-base-image_${{ steps.version.outputs.version }}'"
-          
+          echo "SERVERLESS_BASE_IMAGE_TAG = 'acme-dagster-base-image_${{ github.run_number }}'"
+      - name: Get next version
+        id: get_next_version
+        uses: thenativeweb/get-next-version@main
+        with:
+          prefix: 'v' # optional, defaults to ''
+      - name: Show the next version
+        run: |
+          echo ${{ steps.get_next_version.outputs.version }}
+          echo ${{ steps.get_next_version.outputs.hasNextVersion }}
       - name: Get Dockerfile content
         id: dockerfile_content
         run: echo "dockerfile_content = $(cat docker/Dockerfile)" >> "$GITHUB_ENV"
-    
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -67,12 +66,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
     
         with:
-          tag_name: ${{ steps.version.outputs.version }}
-          release_name: Release ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.get_next_version.outputs.version }}
+          release_name: Release ${{ steps.get_next_version.outputs.version }}
           body: |
             Changes to the Dockerfile:
             ${{ steps.dockerfile_content.outputs.dockerfile_content }}
           draft: false
           prerelease: false
 
-  
