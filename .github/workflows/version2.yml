@@ -1,11 +1,17 @@
+# Builds a docker image to use for dagster fast deployments
+# This script will build & deploy an image to dagster cloud
+# on PR merge to main
+
 name: Build and deploy base docker image for dagster's fast deployments.
 run-name: ${{ github.actor }} is building docker image
-on: 
+on:
   push:
-    tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+    branches:
+      - main
+    paths:
+      - 'docker/**'
 jobs:
-  build:
+  build_docker_image:
     runs-on: ubuntu-latest
     services:
       registry:
@@ -32,30 +38,41 @@ jobs:
         with:
           context: "{{defaultContext}}:docker"
           push: true
-          tags: localhost:5000/test-image:temporary
+          tags: localhost:5000/acme-dagster-base-image:temporary
 
       - name: Inspect docker image
-        run: docker buildx imagetools inspect localhost:5000/test-image:temporary
+        run: docker buildx imagetools inspect localhost:5000/acme-dagster-base-image:temporary
 
       - name: Pull the image to local docker storage
-        run: docker pull localhost:5000/test-image:temporary
+        run: docker pull localhost:5000/acme-dagster-base-image:temporary
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: |
-            Dockerfile contents in this release:
-            $(cat docker/Dockerfile)
-          draft: false
-          prerelease: false
+      - name: Get version
+        id: version
+        uses: codacy/git-version@2.7.1
+
       - name: Print Published Tag
         run: |
           echo "Put the following tag in the 'dagster' repo, branch_deployments.yml SERVERLESS_BASE_IMAGE_TAG"
           echo "to test out your base docker image in staging:"
-          echo "SERVERLESS_BASE_IMAGE_TAG = 'test-image_${{ github.ref }}'"
+          echo "SERVERLESS_BASE_IMAGE_TAG = 'acme-dagster-base-image_${{ steps.version.outputs.version }}'"
+          
+      - name: Get Dockerfile content
+        id: dockerfile_content
+        run: echo "dockerfile_content = $(cat docker/Dockerfile)" >> "$GITHUB_ENV"
+    
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+    
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: Release ${{ steps.version.outputs.version }}
+          body: |
+            Changes to the Dockerfile:
+            ${{ steps.dockerfile_content.outputs.dockerfile_content }}
+          draft: false
+          prerelease: false
 
+  
