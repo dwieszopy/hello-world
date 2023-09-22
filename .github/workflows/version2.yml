@@ -1,24 +1,50 @@
-name: Example workflow
-
+name: Build and deploy base docker image for dagster's fast deployments.
+run-name: ${{ github.actor }} is building docker image
 on: push
 
 jobs:
-  example:
-    name: Example
+  build:
     runs-on: ubuntu-latest
-
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     steps:
-    - name: Clone repository
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        ref: ${{ github.event.pull_request.head.sha }}
-    - name: Get next version
-      id: get_next_version
-      uses: thenativeweb/get-next-version@main
-      with:
-        prefix: 'v' # optional, defaults to ''
-    - name: Show the next version
-      run: |
-        echo ${{ steps.get_next_version.outputs.version }}
-        echo ${{ steps.get_next_version.outputs.hasNextVersion }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          path: project-repo
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+
+      - name: Build and push to temporary local registry 
+        uses: docker/build-push-action@v5
+        with:
+          context: "{{defaultContext}}:docker"
+          push: true
+          tags: localhost:5000/test-image:temporary
+
+      - name: Inspect docker image
+        run: docker buildx imagetools inspect localhost:5000/test-image:temporary
+
+      - name: Pull the image to local docker storage
+        run: docker pull localhost:5000/test-image:temporary
+
+      - name: Get version
+        id: version
+        uses: codacy/git-version@2.7.1
+
+      - name: Print Published Tag
+        run: |
+          echo "Put the following tag in the 'dagster' repo, branch_deployments.yml SERVERLESS_BASE_IMAGE_TAG"
+          echo "to test out your base docker image in staging:"
+          echo "SERVERLESS_BASE_IMAGE_TAG = 'test-image_${{ steps.version.outputs.version }}'"
+
