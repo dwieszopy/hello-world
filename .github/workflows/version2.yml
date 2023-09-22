@@ -29,12 +29,12 @@ jobs:
         run: |
           echo "Put the following tag in the 'dagster' repo, branch_deployments.yml SERVERLESS_BASE_IMAGE_TAG"
           echo "to test out your base docker image in staging:"
-          echo "SERVERLESS_BASE_IMAGE_TAG = 'acme-dagster-base-image_${{ github.run_number }}'" >> "$GITHUB_OUTPUT"
+          echo "SERVERLESS_BASE_IMAGE_TAG='acme-dagster-base-image_${{ github.run_number }}'" >> "$GITHUB_OUTPUT"
           
       - name: Get Dockerfile content
         id: dockerfile_content
         run: |
-          echo "dockerfile_content = $(cat project-repo/docker/Dockerfile)<<EOF" >> "$GITHUB_OUTPUT"
+          echo "dockerfile_content=$(cat project-repo/docker/Dockerfile)<<EOF" >> "$GITHUB_OUTPUT"
           echo $dockerfile_content >> $GITHUB_OUTPUT 
           echo "EOF" >> $GITHUB_OUTPUT
           echo "$(cat project-repo/docker/Dockerfile)"
