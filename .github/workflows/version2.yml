@@ -33,8 +33,8 @@ jobs:
       - name: Get Dockerfile content
         id: dockerfile_content
         run: |
-          echo "pwd"
-          echo "ls -al"
+          echo "$(pwd)"
+          echo "$(ls -al)"
           echo "dockerfile_content = $(cat docker/Dockerfile)" >> "$GITHUB_OUTPUT"
           echo "$(cat docker/Dockerfile)"
     
