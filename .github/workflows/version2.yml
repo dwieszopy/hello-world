@@ -35,7 +35,7 @@ jobs:
         id: dockerfile_content
         run: |
           echo "$(cat project-repo/docker/Dockerfile)"
-          echo dockerfile_content="$(printf "%s\n" "$(cat project-repo/docker/Dockerfile)")">>"$GITHUB_OUTPUT"
+          echo dockerfile_content="$(< project-repo/docker/Dockerfile)">>"$GITHUB_OUTPUT"
       - name: Check outputs
         run: |
           echo ${{ github.run_number }}
